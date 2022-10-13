@@ -15,6 +15,9 @@ const App = () => {
   // 图块更换后数据初始化
   const [squareBeingReplaced, setSquareBeingReplaced ] =useState(null) // dragDrop()
 
+  // 记录分数的初始
+  const [scoreDisplay,setScoreDisplay] = useState(0)
+
 
   //检查色块的连续情况
   // 纵向
@@ -27,6 +30,7 @@ const App = () => {
             square=>currentColorArrangement[square]===decidedColor // 判断三个位置的值都是一样，则做以下操作
             )){
                 columnOfThree.forEach(element=>currentColorArrangement[element]='')
+                return true
             }
     }
   }
@@ -39,6 +43,7 @@ const App = () => {
             square=>currentColorArrangement[square]===decidedColor // 判断纵向四个位置的值都一样，则做以下操作
             )){
                 columnOfForu.forEach(element=>currentColorArrangement[element]='')
+                return true
             }
     }
 
@@ -55,6 +60,7 @@ const App = () => {
             square=>currentColorArrangement[square]===decidedColor // 判断三个位置的值都是一样，则做以下操作
             )){
                 rowOfThree.forEach(element=>currentColorArrangement[element]='')
+                return true
             }
     }
   }
@@ -69,6 +75,7 @@ const App = () => {
             square=>currentColorArrangement[square]===decidedColor // 判断三个位置的值都是一样，则做以下操作
             )){
                 rowOfFour.forEach(element=>currentColorArrangement[element]='')
+                return true
             }
     }
   }
@@ -93,17 +100,20 @@ const App = () => {
   }
 
 
+  console.log('scoreDisplay', scoreDisplay)
   // 拖动
   const dragStart = (e)=>{
-    console.log('e.target:', e.target)
-    console.log('dragstart', dragStart)
+    // console.log('e.target:', e.target)
+    // console.log('dragstart', dragStart)
     setSquareBeingDragged(e.target)
-}
-const dragDrop = (e)=>{
-      console.log('e.target:', e.target)
-      console.log('dragDrop', dragDrop)
+};
+
+    const dragDrop = (e)=>{
+    //   console.log('e.target:', e.target)
+    //   console.log('dragDrop', dragDrop)
       setSquareBeingReplaced(e.target)
-    }
+    };
+
     const dragEnd = (e)=>{ 
       console.log('e.target:', e.target)
     console.log('dragEnd', dragEnd)
@@ -121,6 +131,32 @@ const dragDrop = (e)=>{
     
     console.log('squareBeingDraggedId', squareBeingDraggedId)
     console.log('squareBeingReplacedId', squareBeingReplacedId)
+
+    // 拖动数据的有效性 （限位）
+    const validMoves = [
+        squareBeingDraggedId -1,
+        squareBeingDraggedId -width,
+        squareBeingDraggedId +1,
+        squareBeingDraggedId +width,
+    ]
+
+    const validMove = validMoves.includes(squareBeingReplacedId)
+    
+    const isAColumnOfFour = checkForColumnOfFour
+    const isAColumnOfThree = checkForColumnOfThree
+    const isARowOfFour = checkForRowOfFour
+    const isARowOfThree = checkForRowOfThree
+
+    if(squareBeingReplacedId &&
+        validMove &&
+         (isAColumnOfFour||isAColumnOfThree||isARowOfFour||isARowOfThree)){
+            setSquareBeingDragged(null)
+            setSquareBeingReplaced(null)
+    } else {
+        currentColorArrangement[squareBeingReplacedId] = squareBeingReplaced.style.backgroundColor
+        currentColorArrangement[squareBeingDraggedId] = squareBeingDraggedId.style.backgroundColor
+        setCurrentColorArrangement([...currentColorArrangement])
+    }
 
   }
 
@@ -149,7 +185,7 @@ const dragDrop = (e)=>{
         checkForRowOfThree()
         moveIntoSquareBelow()
         setCurrentColorArrangement([...currentColorArrangement])
-    },10000);
+    },100);
     return ()=>clearInterval(timerCheck)
     
 },[moveIntoSquareBelow,currentColorArrangement])
