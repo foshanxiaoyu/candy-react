@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 
+
+
 const width = 8;
 const candyColors = ["blue", "green", "orange", "red", "purple", "yellow"];
 
 const App = () => {
   //当前数据状态初始化
   const [currentColorArrangement, setCurrentColorArrangement] = useState([]);
+
+  // 图块数据初始化
+  const [squareBeingDragged, setSquareBeingDragged ] =useState(null) // dragStart()
+
+  // 图块更换后数据初始化
+  const [squareBeingReplaced, setSquareBeingReplaced ] =useState(null) // dragDrop()
+
 
   //检查色块的连续情况
   // 纵向
@@ -83,6 +92,38 @@ const App = () => {
     }
   }
 
+
+  // 拖动
+  const dragStart = (e)=>{
+    console.log('e.target:', e.target)
+    console.log('dragstart', dragStart)
+    setSquareBeingDragged(e.target)
+}
+const dragDrop = (e)=>{
+      console.log('e.target:', e.target)
+      console.log('dragDrop', dragDrop)
+      setSquareBeingReplaced(e.target)
+    }
+    const dragEnd = (e)=>{ 
+      console.log('e.target:', e.target)
+    console.log('dragEnd', dragEnd)
+
+//更换ID
+    //来源坑位
+    const squareBeingDraggedId = parseInt(squareBeingDragged.getAttribute('data-id'))
+        
+    //目标坑位 index
+    const squareBeingReplacedId = parseInt(squareBeingReplaced.getAttribute('data-id'))
+
+    currentColorArrangement[squareBeingReplacedId] = squareBeingDragged.style.backgroundColor
+    currentColorArrangement[squareBeingDraggedId] = squareBeingReplaced.style.backgroundColor
+
+    
+    console.log('squareBeingDraggedId', squareBeingDraggedId)
+    console.log('squareBeingReplacedId', squareBeingReplacedId)
+
+  }
+
   
   // 建基板，随机色数组
   const createBoard = () => {
@@ -108,11 +149,11 @@ const App = () => {
         checkForRowOfThree()
         moveIntoSquareBelow()
         setCurrentColorArrangement([...currentColorArrangement])
-    },1000);
+    },10000);
     return ()=>clearInterval(timerCheck)
-
+    
+},[moveIntoSquareBelow,currentColorArrangement])
 //   },[checkForColumnOfFour,checkForColumnOfThree,checkForRowOfFour,checkForRowOfThree,moveIntoSquareBelow,currentColorArrangement])
-  },[moveIntoSquareBelow,currentColorArrangement])
   console.log(currentColorArrangement);
 
   return <div className="app">
@@ -122,9 +163,18 @@ const App = () => {
                 key={index}
                 style={{background:candyColor}}
                 alt={candyColor}
-            />)
-          )
-        }
+                data-id={index}
+                draggable={true}
+                onDragStart={dragStart}//拖动开始时的函数
+                onDragLeave={(e)=>e.preventDefault()}
+                onDragEnter={(e)=>e.preventDefault()}
+                onDragOver={(e)=>e.preventDefault()}
+                onDrop={dragDrop}
+                onDragEnd={dragEnd}//拖动结束后的函数
+
+                />)
+                )
+            }
     </div>
   </div>;
 };
